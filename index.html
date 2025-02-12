@@ -53,12 +53,10 @@
                     // Iterate through each population group (e.g., AFR, AMR)
                     for (const group in result) {
                         if (group !== 'RSID') {
-                            const categoryDiv = document.createElement('div');
-                            categoryDiv.className = 'category';
-
-                            const heading = document.createElement('h2');
-                            heading.textContent = group;
-                            categoryDiv.appendChild(heading);
+                            const details = document.createElement('details');
+                            const summary = document.createElement('summary');
+                            summary.textContent = group;
+                            details.appendChild(summary);
 
                             const table = document.createElement('table');
                             const thead = document.createElement('thead');
@@ -101,8 +99,8 @@
 
                             table.appendChild(thead);
                             table.appendChild(tbody);
-                            categoryDiv.appendChild(table);
-                            resultsContainer.appendChild(categoryDiv);
+                            details.appendChild(table);
+                            resultsContainer.appendChild(details);
                         }
                     }
                 });
