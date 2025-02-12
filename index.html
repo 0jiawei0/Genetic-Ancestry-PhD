@@ -5,8 +5,9 @@
     <title>Search JSON</title>
     <style>
         table {
-            width: 100%;
+            width: 80%;
             border-collapse: collapse;
+            margin-top: 20px;
             margin-bottom: 20px;
         }
 
@@ -18,6 +19,14 @@
 
         th {
             background-color: #f2f2f2;
+        }
+
+        .category {
+            margin-bottom: 40px;
+        }
+
+        .category h2 {
+            margin-top: 0;
         }
     </style>
     <script>
@@ -32,73 +41,10 @@
             displayResults(results);
         }
 
-        // Function to display the search results as tables
+        // Function to display the search results as categorized tables
         function displayResults(results) {
             const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = '';
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p>RSID not found.</p>';
-            } else {
-                results.forEach(result => {
-                    // Iterate through each population group (e.g., AFR, AMR)
-                    for (const group in result) {
-                        if (group !== 'RSID') {
-                            const table = document.createElement('table');
-                            const thead = document.createElement('thead');
-                            const tbody = document.createElement('tbody');
-
-                            // Create table headers
-                            const headers = ['RSID', 'Population', 'MAF', 'FDRp'];
-                            const tr = document.createElement('tr');
-                            headers.forEach(header => {
-                                const th = document.createElement('th');
-                                th.textContent = header;
-                                tr.appendChild(th);
-                            });
-                            thead.appendChild(tr);
-
-                            // Populate table rows with data
-                            result[group].forEach(population => {
-                                const mafKeys = Object.keys(population).filter(key => key.startsWith('MAF.'));
-                                mafKeys.forEach(mafKey => {
-                                    const tr = document.createElement('tr');
-                                    const tdRSID = document.createElement('td');
-                                    tdRSID.textContent = result.RSID;
-                                    tr.appendChild(tdRSID);
-
-                                    const tdPopulation = document.createElement('td');
-                                    tdPopulation.textContent = mafKey.replace('MAF.', '');
-                                    tr.appendChild(tdPopulation);
-
-                                    const tdMAF = document.createElement('td');
-                                    tdMAF.textContent = population[mafKey];
-                                    tr.appendChild(tdMAF);
-
-                                    const tdFDRp = document.createElement('td');
-                                    tdFDRp.textContent = population.FDRp.map(fdr => `(${fdr.vtype}: ${fdr.p})`).join(', ');
-                                    tr.appendChild(tdFDRp);
-
-                                    tbody.appendChild(tr);
-                                });
-                            });
-
-                            table.appendChild(thead);
-                            table.appendChild(tbody);
-                            resultsContainer.appendChild(table);
-                        }
-                    }
-                });
-            }
-        }
-    </script>
-</head>
-
-<body>
-    <h1>Search JSON</h1>
-    <input type="text" id="rsid" placeholder="Enter RSID">
-    <button onclick="searchRSID()">Search</button>
-    <div id="results"></div>
-</body>
-
-</html>
+                resultsContainer.innerHTML = '<p
