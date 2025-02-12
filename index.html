@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search JSON</title>
+    <script>
+        // Function to fetch and search the JSON file
+        async function searchRSID() {
+            const rsidQuery = document.getElementById('rsid').value;
+            const response = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbAF_FDRp.json');
+            const data = await response.json();
+            
+            // Filter results based on RSID
+            const results = data.filter(entry => entry.RSID === rsidQuery);
+            displayResults(results);
+        }
+
+        // Function to display the search results
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p>RSID not found.</p>';
+            } else {
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.textContent = JSON.stringify(result, null, 2);
+                    resultsContainer.appendChild(resultItem);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Search JSON</h1>
+    <input type="text" id="rsid" placeholder="Enter RSID">
+    <button onclick="searchRSID()">Search</button>
+    <div id="results"></div>
+</body>
+</html>
