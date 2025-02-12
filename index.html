@@ -47,4 +47,75 @@
             resultsContainer.innerHTML = '';
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p
+                resultsContainer.innerHTML = '<p>RSID not found.</p>';
+            } else {
+                results.forEach(result => {
+                    // Iterate through each population group (e.g., AFR, AMR)
+                    for (const group in result) {
+                        if (group !== 'RSID') {
+                            const categoryDiv = document.createElement('div');
+                            categoryDiv.className = 'category';
+
+                            const heading = document.createElement('h2');
+                            heading.textContent = group;
+                            categoryDiv.appendChild(heading);
+
+                            const table = document.createElement('table');
+                            const thead = document.createElement('thead');
+                            const tbody = document.createElement('tbody');
+
+                            // Create table headers
+                            const headers = ['RSID', 'Population', 'MAF', 'FDRp'];
+                            const tr = document.createElement('tr');
+                            headers.forEach(header => {
+                                const th = document.createElement('th');
+                                th.textContent = header;
+                                tr.appendChild(th);
+                            });
+                            thead.appendChild(tr);
+
+                            // Populate table rows with data
+                            result[group].forEach(population => {
+                                const mafKeys = Object.keys(population).filter(key => key.startsWith('MAF.'));
+                                mafKeys.forEach(mafKey => {
+                                    const tr = document.createElement('tr');
+                                    const tdRSID = document.createElement('td');
+                                    tdRSID.textContent = result.RSID;
+                                    tr.appendChild(tdRSID);
+
+                                    const tdPopulation = document.createElement('td');
+                                    tdPopulation.textContent = mafKey.replace('MAF.', '');
+                                    tr.appendChild(tdPopulation);
+
+                                    const tdMAF = document.createElement('td');
+                                    tdMAF.textContent = population[mafKey];
+                                    tr.appendChild(tdMAF);
+
+                                    const tdFDRp = document.createElement('td');
+                                    tdFDRp.textContent = population.FDRp.map(fdr => `(${fdr.vtype}: ${fdr.p})`).join(', ');
+                                    tr.appendChild(tdFDRp);
+
+                                    tbody.appendChild(tr);
+                                });
+                            });
+
+                            table.appendChild(thead);
+                            table.appendChild(tbody);
+                            categoryDiv.appendChild(table);
+                            resultsContainer.appendChild(categoryDiv);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Search JSON</h1>
+    <input type="text" id="rsid" placeholder="Enter RSID">
+    <button onclick="searchRSID()">Search</button>
+    <div id="results"></div>
+</body>
+
+</html>
