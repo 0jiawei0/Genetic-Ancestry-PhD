@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Ancestry informative marker (AIM) search</title>
+    <title>Ancestry Informative Gene Search</title>
     <style>
         body {
             font-family: Calibri, sans-serif;
@@ -35,42 +35,41 @@
     </style>
     <script>
         // Function to fetch and search both JSON files
-        async function searchRSID() {
-            const rsidQuery = document.getElementById('rsid').value;
-            const rsidQueryNoRS = rsidQuery.replace(/^rs/, ''); // Remove 'rs' from the query
+        async function searchGene() {
+            const geneQuery = document.getElementById('gene').value.toUpperCase();
 
-            const response1 = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbAF_FDRp.json');
+            const response1 = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbHI_FDRp.json');
             const data1 = await response1.json();
 
-            const response2 = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbAF_INFO.json');
+            const response2 = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbHI_INFO.json');
             const data2 = await response2.json();
 
-            // Filter results based on RSID
-            const results1 = data1.filter(entry => entry.RSID === rsidQuery);
-            const results2 = data2.filter(entry => entry.RSID === rsidQueryNoRS);
+            // Filter results based on Gene (like grep)
+            const results1 = data1.filter(entry => entry.Gene.toUpperCase().includes(geneQuery));
+            const results2 = data2.filter(entry => entry.Gene.toUpperCase().includes(geneQuery));
 
-            displayResults(results1, results2, rsidQuery);
+            displayResults(results1, results2, geneQuery);
         }
 
         // Function to display the search results as transposed tables with multi-row header
-        function displayResults(results1, results2, rsidQuery) {
+        function displayResults(results1, results2, geneQuery) {
             const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = '';
 
-            const rsidHeader = document.createElement('h2');
-            rsidHeader.textContent = `Results for ${rsidQuery}`;
-            resultsContainer.appendChild(rsidHeader);
+            const geneHeader = document.createElement('h2');
+            geneHeader.textContent = `Results for ${geneQuery}`;
+            resultsContainer.appendChild(geneHeader);
 
             if (results1.length === 0 && results2.length === 0) {
-                resultsContainer.innerHTML += '<p>RSID not found.</p>';
+                resultsContainer.innerHTML += '<p>Gene not found.</p>';
                 return;
             }
 
-            // Display results from phaseFinal_dbAF_FDRp.json
+            // Display results from phaseFinal_dbHI_FDRp.json
             if (results1.length > 0) {
                 results1.forEach(result => {
                     for (const group in result) {
-                        if (group !== 'RSID') {
+                        if (group !== 'Gene') {
                             const details = document.createElement('details');
                             const summary = document.createElement('summary');
                             summary.textContent = group;
@@ -84,29 +83,38 @@
                             const headerRow1 = document.createElement('tr');
                             const headerRow2 = document.createElement('tr');
 
-                            const thMAF = document.createElement('th');
-                            thMAF.setAttribute('colspan', Object.keys(result[group][0]).filter(key => key.startsWith('MAF.')).length);
-                            thMAF.textContent = 'MAF';
-                            headerRow1.appendChild(thMAF);
+                            const thmedHI = document.createElement('th');
+                            thmedHI.setAttribute('colspan', Object.keys(result[group][0]).filter(key => key.startsWith('medHI.')).length);
+                            thmedHI.textContent = 'medHI';
+                            headerRow1.appendChild(thmedHI);
+
+                            const thavgHI = document.createElement('th');
+                            thavgHI.setAttribute('colspan', Object.keys(result[group][0].avgHI[0]).length);
+                            thavgHI.textContent = 'avgHI';
+                            headerRow1.appendChild(thavgHI);
 
                             const thFDRp = document.createElement('th');
-                            thFDRp.setAttribute('colspan', result[group][0].FDRp.length);
+                            thFDRp.setAttribute('colspan', 1);
                             thFDRp.textContent = 'FDRp';
                             headerRow1.appendChild(thFDRp);
 
-                            // Create population and FDRp headers
-                            const mafKeys = Object.keys(result[group][0]).filter(key => key.startsWith('MAF.'));
-                            mafKeys.forEach(mafKey => {
+                            // Create population headers
+                            const medHIkKeys = Object.keys(result[group][0]).filter(key => key.startsWith('medHI.'));
+                            medHIkKeys.forEach(medHIKey => {
                                 const th = document.createElement('th');
-                                th.textContent = mafKey.replace('MAF.', '');
+                                th.textContent = medHIKey.replace('medHI.', '');
                                 headerRow2.appendChild(th);
                             });
 
-                            result[group][0].FDRp.forEach(fdr => {
+                            Object.keys(result[group][0].avgHI[0]).forEach(avgHIKey => {
                                 const th = document.createElement('th');
-                                th.textContent = fdr.vtype;
+                                th.textContent = avgHIKey;
                                 headerRow2.appendChild(th);
                             });
+
+                            const thFDRpVal = document.createElement('th');
+                            thFDRpVal.textContent = 'FDRp';
+                            headerRow2.appendChild(thFDRpVal);
 
                             thead.appendChild(headerRow1);
                             thead.appendChild(headerRow2);
@@ -114,17 +122,21 @@
                             // Populate table rows with data
                             result[group].forEach(population => {
                                 const tr = document.createElement('tr');
-                                mafKeys.forEach(mafKey => {
+                                medHIkKeys.forEach(medHIKey => {
                                     const td = document.createElement('td');
-                                    td.textContent = population[mafKey];
+                                    td.textContent = population[medHIKey];
                                     tr.appendChild(td);
                                 });
 
-                                population.FDRp.forEach(fdr => {
+                                Object.keys(population.avgHI[0]).forEach(avgHIKey => {
                                     const td = document.createElement('td');
-                                    td.textContent = fdr.p;
+                                    td.textContent = population.avgHI[0][avgHIKey];
                                     tr.appendChild(td);
                                 });
+
+                                const tdFDRp = document.createElement('td');
+                                tdFDRp.textContent = population.FDRp;
+                                tr.appendChild(tdFDRp);
 
                                 tbody.appendChild(tr);
                             });
@@ -138,7 +150,7 @@
                 });
             }
 
-            // Display results from phaseFinal_dbAF_INFO.json
+            // Display results from phaseFinal_dbHI_INFO.json
             if (results2.length > 0) {
                 results2.forEach(result => {
                     const details = document.createElement('details');
@@ -152,7 +164,7 @@
 
                     // Create table headers
                     const headerRow = document.createElement('tr');
-                    const headers = ['Nucleotide Change', 'Gene Sym', 'Functional Annotation', 'Gene Regulation', 'Biotransformation', 'ADME Class', 'Drug'];
+                    const headers = ['TSG', 'ADMEClass', 'Drug'];
                     headers.forEach(header => {
                         const th = document.createElement('th');
                         th.textContent = header;
@@ -162,25 +174,9 @@
 
                     // Populate table rows with data
                     const tr = document.createElement('tr');
-                    const tdNucleotideChange = document.createElement('td');
-                    tdNucleotideChange.textContent = result.NucleotideChange;
-                    tr.appendChild(tdNucleotideChange);
-
-                    const tdGeneSym = document.createElement('td');
-                    tdGeneSym.textContent = result.GeneSym;
-                    tr.appendChild(tdGeneSym);
-
-                    const tdFunctionalAnnotation = document.createElement('td');
-                    tdFunctionalAnnotation.textContent = result.FunctionalAnnotation;
-                    tr.appendChild(tdFunctionalAnnotation);
-
-                    const tdGeneRegulation = document.createElement('td');
-                    tdGeneRegulation.textContent = result.GeneRegulation;
-                    tr.appendChild(tdGeneRegulation);
-
-                    const tdBiotransformation = document.createElement('td');
-                    tdBiotransformation.textContent = result.Biotransformation;
-                    tr.appendChild(tdBiotransformation);
+                    const tdTSG = document.createElement('td');
+                    tdTSG.textContent = result.TSG;
+                    tr.appendChild(tdTSG);
 
                     const tdADMEClass = document.createElement('td');
                     tdADMEClass.textContent = result.ADMEClass;
@@ -203,9 +199,9 @@
 </head>
 
 <body>
-    <h1>Ancestry informative marker (AIM) search</h1>
-    <input type="text" id="rsid" placeholder="Enter RSID">
-    <button onclick="searchRSID()">Search</button>
+    <h1>Ancestry Informative Gene Search</h1>
+    <input type="text" id="gene" placeholder="Enter Gene">
+    <button onclick="searchGene()">Search</button>
     <br><br>
     <div id="results"></div>
 </body>
