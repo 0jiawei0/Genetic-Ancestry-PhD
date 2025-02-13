@@ -37,6 +37,7 @@
         // Function to fetch and search both JSON files
         async function searchRSID() {
             const rsidQuery = document.getElementById('rsid').value;
+            const rsidQueryNoRS = rsidQuery.replace(/^rs/, ''); // Remove 'rs' from the query
 
             const response1 = await fetch('https://raw.githubusercontent.com/0jiawei0/Genetic-Ancestry-PhD/refs/heads/main/phaseFinal_dbAF_FDRp.json');
             const data1 = await response1.json();
@@ -46,7 +47,7 @@
 
             // Filter results based on RSID
             const results1 = data1.filter(entry => entry.RSID === rsidQuery);
-            const results2 = data2.filter(entry => entry.RSID === rsidQuery);
+            const results2 = data2.filter(entry => entry.RSID === rsidQueryNoRS);
 
             displayResults(results1, results2, rsidQuery);
         }
