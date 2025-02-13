@@ -4,6 +4,10 @@
 <head>
     <title>Search JSON</title>
     <style>
+        body {
+            font-family: Calibri, sans-serif;
+        }
+
         table {
             width: 80%;
             border-collapse: collapse;
@@ -38,16 +42,20 @@
 
             // Filter results based on RSID
             const results = data.filter(entry => entry.RSID === rsidQuery);
-            displayResults(results);
+            displayResults(results, rsidQuery);
         }
 
         // Function to display the search results as categorized tables
-        function displayResults(results) {
+        function displayResults(results, rsidQuery) {
             const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = '';
 
+            const rsidHeader = document.createElement('h2');
+            rsidHeader.textContent = `Results for RSID: ${rsidQuery}`;
+            resultsContainer.appendChild(rsidHeader);
+
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p>RSID not found.</p>';
+                resultsContainer.innerHTML += '<p>RSID not found.</p>';
             } else {
                 results.forEach(result => {
                     // Iterate through each population group (e.g., AFR, AMR)
@@ -63,7 +71,7 @@
                             const tbody = document.createElement('tbody');
 
                             // Create table headers
-                            const headers = ['RSID', 'Population', 'MAF', 'FDRp'];
+                            const headers = ['Population', 'MAF', 'FDRp Type', 'FDRp Value'];
                             const tr = document.createElement('tr');
                             headers.forEach(header => {
                                 const th = document.createElement('th');
@@ -76,24 +84,28 @@
                             result[group].forEach(population => {
                                 const mafKeys = Object.keys(population).filter(key => key.startsWith('MAF.'));
                                 mafKeys.forEach(mafKey => {
-                                    const tr = document.createElement('tr');
-                                    const tdRSID = document.createElement('td');
-                                    tdRSID.textContent = result.RSID;
-                                    tr.appendChild(tdRSID);
+                                    const fdrpEntries = population.FDRp;
+                                    for (const fdrp of fdrpEntries) {
+                                        const tr = document.createElement('tr');
 
-                                    const tdPopulation = document.createElement('td');
-                                    tdPopulation.textContent = mafKey.replace('MAF.', '');
-                                    tr.appendChild(tdPopulation);
+                                        const tdPopulation = document.createElement('td');
+                                        tdPopulation.textContent = mafKey.replace('MAF.', '');
+                                        tr.appendChild(tdPopulation);
 
-                                    const tdMAF = document.createElement('td');
-                                    tdMAF.textContent = population[mafKey];
-                                    tr.appendChild(tdMAF);
+                                        const tdMAF = document.createElement('td');
+                                        tdMAF.textContent = population[mafKey];
+                                        tr.appendChild(tdMAF);
 
-                                    const tdFDRp = document.createElement('td');
-                                    tdFDRp.textContent = population.FDRp.map(fdr => `(${fdr.vtype}: ${fdr.p})`).join(', ');
-                                    tr.appendChild(tdFDRp);
+                                        const tdFDRpType = document.createElement('td');
+                                        tdFDRpType.textContent = fdrp.vtype;
+                                        tr.appendChild(tdFDRpType);
 
-                                    tbody.appendChild(tr);
+                                        const tdFDRpValue = document.createElement('td');
+                                        tdFDRpValue.textContent = fdrp.p;
+                                        tr.appendChild(tdFDRpValue);
+
+                                        tbody.appendChild(tr);
+                                    }
                                 });
                             });
 
@@ -113,6 +125,7 @@
     <h1>Search JSON</h1>
     <input type="text" id="rsid" placeholder="Enter RSID">
     <button onclick="searchRSID()">Search</button>
+    <br><br>
     <div id="results"></div>
 </body>
 
