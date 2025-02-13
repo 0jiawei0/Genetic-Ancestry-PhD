@@ -32,10 +32,6 @@
         .category h2 {
             margin-top: 0;
         }
-
-        colgroup col {
-            background-color: #f2f2f2;
-        }
     </style>
     <script>
         // Function to fetch and search the JSON file
@@ -49,7 +45,7 @@
             displayResults(results, rsidQuery);
         }
 
-        // Function to display the search results as categorized tables
+        // Function to display the search results as transposed tables with multi-row header
         function displayResults(results, rsidQuery) {
             const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = '';
@@ -71,59 +67,56 @@
                             details.appendChild(summary);
 
                             const table = document.createElement('table');
-                            const colgroup = document.createElement('colgroup');
-                            const col1 = document.createElement('col');
-                            const col2 = document.createElement('col');
-                            const col3 = document.createElement('col');
-                            const col4 = document.createElement('col');
-                            colgroup.appendChild(col1);
-                            colgroup.appendChild(col2);
-                            colgroup.appendChild(col3);
-                            colgroup.appendChild(col4);
-                            table.appendChild(colgroup);
-
                             const thead = document.createElement('thead');
                             const tbody = document.createElement('tbody');
 
-                            // Create table headers
-                            const headers = ['Population', 'MAF'];
-                            const tr = document.createElement('tr');
-                            headers.forEach(header => {
+                            // Create multi-row header
+                            const headerRow1 = document.createElement('tr');
+                            const headerRow2 = document.createElement('tr');
+
+                            const thMAF = document.createElement('th');
+                            thMAF.setAttribute('colspan', Object.keys(result[group][0]).filter(key => key.startsWith('MAF.')).length);
+                            thMAF.textContent = 'MAF';
+                            headerRow1.appendChild(thMAF);
+
+                            const thFDRp = document.createElement('th');
+                            thFDRp.setAttribute('colspan', result[group][0].FDRp.length);
+                            thFDRp.textContent = 'FDRp';
+                            headerRow1.appendChild(thFDRp);
+
+                            // Create population and FDRp headers
+                            const mafKeys = Object.keys(result[group][0]).filter(key => key.startsWith('MAF.'));
+                            mafKeys.forEach(mafKey => {
                                 const th = document.createElement('th');
-                                th.textContent = header;
-                                tr.appendChild(th);
+                                th.textContent = mafKey.replace('MAF.', '');
+                                headerRow2.appendChild(th);
                             });
 
-                            // Add FDRp headers dynamically
-                            const fdrpHeaders = result[group][0].FDRp.map(fdr => fdr.vtype);
-                            fdrpHeaders.forEach(header => {
+                            result[group][0].FDRp.forEach(fdr => {
                                 const th = document.createElement('th');
-                                th.textContent = `FDRp ${header}`;
-                                tr.appendChild(th);
+                                th.textContent = fdr.vtype;
+                                headerRow2.appendChild(th);
                             });
-                            thead.appendChild(tr);
+
+                            thead.appendChild(headerRow1);
+                            thead.appendChild(headerRow2);
 
                             // Populate table rows with data
                             result[group].forEach(population => {
-                                const mafKeys = Object.keys(population).filter(key => key.startsWith('MAF.'));
+                                const tr = document.createElement('tr');
                                 mafKeys.forEach(mafKey => {
-                                    const tr = document.createElement('tr');
-                                    const tdPopulation = document.createElement('td');
-                                    tdPopulation.textContent = mafKey.replace('MAF.', '');
-                                    tr.appendChild(tdPopulation);
-
-                                    const tdMAF = document.createElement('td');
-                                    tdMAF.textContent = population[mafKey];
-                                    tr.appendChild(tdMAF);
-
-                                    population.FDRp.forEach(fdr => {
-                                        const tdFDRpValue = document.createElement('td');
-                                        tdFDRpValue.textContent = fdr.p;
-                                        tr.appendChild(tdFDRpValue);
-                                    });
-
-                                    tbody.appendChild(tr);
+                                    const td = document.createElement('td');
+                                    td.textContent = population[mafKey];
+                                    tr.appendChild(td);
                                 });
+
+                                population.FDRp.forEach(fdr => {
+                                    const td = document.createElement('td');
+                                    td.textContent = fdr.p;
+                                    tr.appendChild(td);
+                                });
+
+                                tbody.appendChild(tr);
                             });
 
                             table.appendChild(thead);
