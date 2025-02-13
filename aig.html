@@ -94,7 +94,7 @@
                             headerRow1.appendChild(thavgHI);
 
                             const thFDRp = document.createElement('th');
-                            thFDRp.setAttribute('colspan', 1);
+                            thFDRp.setAttribute('rowspan', 2);
                             thFDRp.textContent = 'FDRp';
                             headerRow1.appendChild(thFDRp);
 
@@ -111,10 +111,6 @@
                                 th.textContent = avgHIKey;
                                 headerRow2.appendChild(th);
                             });
-
-                            const thFDRpVal = document.createElement('th');
-                            thFDRpVal.textContent = 'FDRp';
-                            headerRow2.appendChild(thFDRpVal);
 
                             thead.appendChild(headerRow1);
                             thead.appendChild(headerRow2);
@@ -183,7 +179,10 @@
                     tr.appendChild(tdADMEClass);
 
                     const tdDrug = document.createElement('td');
-                    const drugInfo = result.Drug.map((drug, index) => `${drug.name}<sup><a href="${drug.link}" target="_blank">${index + 1}</a></sup>`).join('; ');
+                    const drugInfo = result.Drug.map((drug, index) => {
+                        const links = drug.link.split(';').map((link, i) => `<a href="${link}" target="_blank">${index + 1}.${i + 1}</a>`).join('; ');
+                        return `${drug.name}<sup>${links}</sup>`;
+                    }).join('; ');
                     tdDrug.innerHTML = drugInfo;
                     tr.appendChild(tdDrug);
 
